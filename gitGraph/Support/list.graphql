@@ -1,0 +1,27 @@
+query searchJava($queryString: String!, $id: String) {
+    search(query: $queryString, type: REPOSITORY, first: 10, after: $id) {
+        repositoryCount
+        edges {
+            cursor
+            node {
+                ... on Repository {
+                    id,
+                    name,
+                    owner{
+                        id,
+                        login,
+                        avatarUrl,
+                    },
+                    descriptionHTML,
+                    stargazers {
+                        totalCount
+                    },
+                    forks {
+                        totalCount
+                    }
+                    updatedAt
+                }
+            }
+        }
+    }
+}
