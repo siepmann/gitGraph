@@ -1,18 +1,22 @@
-query searchJava($queryString: String!, $id: String) {
-    search(query: $queryString, type: REPOSITORY, first: 10, after: $id) {
+fragment owner on Repository {
+    owner {
+        id,
+        login,
+        avatarUrl
+    }
+}
+
+query searchJava($queryString: String!, $cursor: String) {
+    search(query: $queryString, type: REPOSITORY, first: 10, after: $cursor) {
         repositoryCount
         edges {
             cursor
             node {
                 ... on Repository {
-                    id,
                     name,
-                    owner{
-                        id,
-                        login,
-                        avatarUrl,
-                    },
-                    descriptionHTML,
+                    nameWithOwner,
+                    ...owner,
+                    description,
                     stargazers {
                         totalCount
                     },

@@ -4,25 +4,27 @@ import Apollo
 
 public final class SearchJavaQuery: GraphQLQuery {
   public static let operationString =
-    "query searchJava($queryString: String!, $id: String) {\n  search(query: $queryString, type: REPOSITORY, first: 10, after: $id) {\n    __typename\n    repositoryCount\n    edges {\n      __typename\n      cursor\n      node {\n        __typename\n        ... on Repository {\n          id\n          name\n          owner {\n            __typename\n            id\n            login\n            avatarUrl\n          }\n          descriptionHTML\n          stargazers {\n            __typename\n            totalCount\n          }\n          forks {\n            __typename\n            totalCount\n          }\n          updatedAt\n        }\n      }\n    }\n  }\n}"
+    "query searchJava($queryString: String!, $cursor: String) {\n  search(query: $queryString, type: REPOSITORY, first: 10, after: $cursor) {\n    __typename\n    repositoryCount\n    edges {\n      __typename\n      cursor\n      node {\n        __typename\n        ... on Repository {\n          name\n          nameWithOwner\n          ...owner\n          description\n          stargazers {\n            __typename\n            totalCount\n          }\n          forks {\n            __typename\n            totalCount\n          }\n          updatedAt\n        }\n      }\n    }\n  }\n}"
+
+  public static var requestString: String { return operationString.appending(Owner.fragmentString) }
 
   public var queryString: String
-  public var id: String?
+  public var cursor: String?
 
-  public init(queryString: String, id: String? = nil) {
+  public init(queryString: String, cursor: String? = nil) {
     self.queryString = queryString
-    self.id = id
+    self.cursor = cursor
   }
 
   public var variables: GraphQLMap? {
-    return ["queryString": queryString, "id": id]
+    return ["queryString": queryString, "cursor": cursor]
   }
 
   public struct Data: GraphQLSelectionSet {
     public static let possibleTypes = ["Query"]
 
     public static let selections: [GraphQLSelection] = [
-      GraphQLField("search", arguments: ["query": GraphQLVariable("queryString"), "type": "REPOSITORY", "first": 10, "after": GraphQLVariable("id")], type: .nonNull(.object(Search.selections))),
+      GraphQLField("search", arguments: ["query": GraphQLVariable("queryString"), "type": "REPOSITORY", "first": 10, "after": GraphQLVariable("cursor")], type: .nonNull(.object(Search.selections))),
     ]
 
     public var snapshot: Snapshot
@@ -179,8 +181,8 @@ public final class SearchJavaQuery: GraphQLQuery {
             return Node(snapshot: ["__typename": "MarketplaceListing"])
           }
 
-          public static func makeRepository(id: GraphQLID, name: String, owner: AsRepository.Owner, descriptionHtml: String, stargazers: AsRepository.Stargazer, forks: AsRepository.Fork, updatedAt: String) -> Node {
-            return Node(snapshot: ["__typename": "Repository", "id": id, "name": name, "owner": owner.snapshot, "descriptionHTML": descriptionHtml, "stargazers": stargazers.snapshot, "forks": forks.snapshot, "updatedAt": updatedAt])
+          public static func makeRepository(name: String, nameWithOwner: String, owner: AsRepository.Owner, description: String? = nil, stargazers: AsRepository.Stargazer, forks: AsRepository.Fork, updatedAt: String) -> Node {
+            return Node(snapshot: ["__typename": "Repository", "name": name, "nameWithOwner": nameWithOwner, "owner": owner.snapshot, "description": description, "stargazers": stargazers.snapshot, "forks": forks.snapshot, "updatedAt": updatedAt])
           }
 
           public var __typename: String {
@@ -208,10 +210,11 @@ public final class SearchJavaQuery: GraphQLQuery {
 
             public static let selections: [GraphQLSelection] = [
               GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-              GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
               GraphQLField("name", type: .nonNull(.scalar(String.self))),
+              GraphQLField("nameWithOwner", type: .nonNull(.scalar(String.self))),
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
               GraphQLField("owner", type: .nonNull(.object(Owner.selections))),
-              GraphQLField("descriptionHTML", type: .nonNull(.scalar(String.self))),
+              GraphQLField("description", type: .scalar(String.self)),
               GraphQLField("stargazers", type: .nonNull(.object(Stargazer.selections))),
               GraphQLField("forks", type: .nonNull(.object(Fork.selections))),
               GraphQLField("updatedAt", type: .nonNull(.scalar(String.self))),
@@ -223,8 +226,8 @@ public final class SearchJavaQuery: GraphQLQuery {
               self.snapshot = snapshot
             }
 
-            public init(id: GraphQLID, name: String, owner: Owner, descriptionHtml: String, stargazers: Stargazer, forks: Fork, updatedAt: String) {
-              self.init(snapshot: ["__typename": "Repository", "id": id, "name": name, "owner": owner.snapshot, "descriptionHTML": descriptionHtml, "stargazers": stargazers.snapshot, "forks": forks.snapshot, "updatedAt": updatedAt])
+            public init(name: String, nameWithOwner: String, owner: Owner, description: String? = nil, stargazers: Stargazer, forks: Fork, updatedAt: String) {
+              self.init(snapshot: ["__typename": "Repository", "name": name, "nameWithOwner": nameWithOwner, "owner": owner.snapshot, "description": description, "stargazers": stargazers.snapshot, "forks": forks.snapshot, "updatedAt": updatedAt])
             }
 
             public var __typename: String {
@@ -233,15 +236,6 @@ public final class SearchJavaQuery: GraphQLQuery {
               }
               set {
                 snapshot.updateValue(newValue, forKey: "__typename")
-              }
-            }
-
-            public var id: GraphQLID {
-              get {
-                return snapshot["id"]! as! GraphQLID
-              }
-              set {
-                snapshot.updateValue(newValue, forKey: "id")
               }
             }
 
@@ -255,6 +249,16 @@ public final class SearchJavaQuery: GraphQLQuery {
               }
             }
 
+            /// The repository's name with owner.
+            public var nameWithOwner: String {
+              get {
+                return snapshot["nameWithOwner"]! as! String
+              }
+              set {
+                snapshot.updateValue(newValue, forKey: "nameWithOwner")
+              }
+            }
+
             /// The User owner of the repository.
             public var owner: Owner {
               get {
@@ -265,13 +269,13 @@ public final class SearchJavaQuery: GraphQLQuery {
               }
             }
 
-            /// The description of the repository rendered to HTML.
-            public var descriptionHtml: String {
+            /// The description of the repository.
+            public var description: String? {
               get {
-                return snapshot["descriptionHTML"]! as! String
+                return snapshot["description"] as? String
               }
               set {
-                snapshot.updateValue(newValue, forKey: "descriptionHTML")
+                snapshot.updateValue(newValue, forKey: "description")
               }
             }
 
@@ -302,6 +306,28 @@ public final class SearchJavaQuery: GraphQLQuery {
               }
               set {
                 snapshot.updateValue(newValue, forKey: "updatedAt")
+              }
+            }
+
+            public var fragments: Fragments {
+              get {
+                return Fragments(snapshot: snapshot)
+              }
+              set {
+                snapshot += newValue.snapshot
+              }
+            }
+
+            public struct Fragments {
+              public var snapshot: Snapshot
+
+              public var owner: Owner {
+                get {
+                  return Owner(snapshot: snapshot)
+                }
+                set {
+                  snapshot += newValue.snapshot
+                }
               }
             }
 
@@ -445,6 +471,110 @@ public final class SearchJavaQuery: GraphQLQuery {
             }
           }
         }
+      }
+    }
+  }
+}
+
+public struct Owner: GraphQLFragment {
+  public static let fragmentString =
+    "fragment owner on Repository {\n  __typename\n  owner {\n    __typename\n    id\n    login\n    avatarUrl\n  }\n}"
+
+  public static let possibleTypes = ["Repository"]
+
+  public static let selections: [GraphQLSelection] = [
+    GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+    GraphQLField("owner", type: .nonNull(.object(Owner.selections))),
+  ]
+
+  public var snapshot: Snapshot
+
+  public init(snapshot: Snapshot) {
+    self.snapshot = snapshot
+  }
+
+  public init(owner: Owner) {
+    self.init(snapshot: ["__typename": "Repository", "owner": owner.snapshot])
+  }
+
+  public var __typename: String {
+    get {
+      return snapshot["__typename"]! as! String
+    }
+    set {
+      snapshot.updateValue(newValue, forKey: "__typename")
+    }
+  }
+
+  /// The User owner of the repository.
+  public var owner: Owner {
+    get {
+      return Owner(snapshot: snapshot["owner"]! as! Snapshot)
+    }
+    set {
+      snapshot.updateValue(newValue.snapshot, forKey: "owner")
+    }
+  }
+
+  public struct Owner: GraphQLSelectionSet {
+    public static let possibleTypes = ["Organization", "User"]
+
+    public static let selections: [GraphQLSelection] = [
+      GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+      GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
+      GraphQLField("login", type: .nonNull(.scalar(String.self))),
+      GraphQLField("avatarUrl", type: .nonNull(.scalar(String.self))),
+    ]
+
+    public var snapshot: Snapshot
+
+    public init(snapshot: Snapshot) {
+      self.snapshot = snapshot
+    }
+
+    public static func makeOrganization(id: GraphQLID, login: String, avatarUrl: String) -> Owner {
+      return Owner(snapshot: ["__typename": "Organization", "id": id, "login": login, "avatarUrl": avatarUrl])
+    }
+
+    public static func makeUser(id: GraphQLID, login: String, avatarUrl: String) -> Owner {
+      return Owner(snapshot: ["__typename": "User", "id": id, "login": login, "avatarUrl": avatarUrl])
+    }
+
+    public var __typename: String {
+      get {
+        return snapshot["__typename"]! as! String
+      }
+      set {
+        snapshot.updateValue(newValue, forKey: "__typename")
+      }
+    }
+
+    public var id: GraphQLID {
+      get {
+        return snapshot["id"]! as! GraphQLID
+      }
+      set {
+        snapshot.updateValue(newValue, forKey: "id")
+      }
+    }
+
+    /// The username used to login.
+    public var login: String {
+      get {
+        return snapshot["login"]! as! String
+      }
+      set {
+        snapshot.updateValue(newValue, forKey: "login")
+      }
+    }
+
+    /// A URL pointing to the owner's public avatar.
+    public var avatarUrl: String {
+      get {
+        return snapshot["avatarUrl"]! as! String
+      }
+      set {
+        snapshot.updateValue(newValue, forKey: "avatarUrl")
       }
     }
   }
