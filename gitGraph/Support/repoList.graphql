@@ -6,7 +6,7 @@ fragment owner on Repository {
     }
 }
 
-query searchJava($queryString: String!, $cursor: String) {
+query searchRepoByLanguage($queryString: String!, $cursor: String) {
     search(query: $queryString, type: REPOSITORY, first: 10, after: $cursor) {
         repositoryCount
         edges {

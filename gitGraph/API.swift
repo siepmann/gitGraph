@@ -2,9 +2,320 @@
 
 import Apollo
 
-public final class SearchJavaQuery: GraphQLQuery {
+public final class ListRepoPullRequestQuery: GraphQLQuery {
   public static let operationString =
-    "query searchJava($queryString: String!, $cursor: String) {\n  search(query: $queryString, type: REPOSITORY, first: 10, after: $cursor) {\n    __typename\n    repositoryCount\n    edges {\n      __typename\n      cursor\n      node {\n        __typename\n        ... on Repository {\n          name\n          nameWithOwner\n          ...owner\n          description\n          stargazers {\n            __typename\n            totalCount\n          }\n          forks {\n            __typename\n            totalCount\n          }\n          updatedAt\n        }\n      }\n    }\n  }\n}"
+    "query listRepoPullRequest($repoOwner: String!, $repoName: String!, $id: String) {\n  repository(owner: $repoOwner, name: $repoName) {\n    __typename\n    pullRequests(states: [OPEN], first: 10, after: $id, orderBy: {field: CREATED_AT, direction: DESC}) {\n      __typename\n      totalCount\n      pageInfo {\n        __typename\n        endCursor\n        startCursor\n      }\n      nodes {\n        __typename\n        title\n        body\n        author {\n          __typename\n          login\n          avatarUrl\n        }\n      }\n    }\n  }\n}"
+
+  public var repoOwner: String
+  public var repoName: String
+  public var id: String?
+
+  public init(repoOwner: String, repoName: String, id: String? = nil) {
+    self.repoOwner = repoOwner
+    self.repoName = repoName
+    self.id = id
+  }
+
+  public var variables: GraphQLMap? {
+    return ["repoOwner": repoOwner, "repoName": repoName, "id": id]
+  }
+
+  public struct Data: GraphQLSelectionSet {
+    public static let possibleTypes = ["Query"]
+
+    public static let selections: [GraphQLSelection] = [
+      GraphQLField("repository", arguments: ["owner": GraphQLVariable("repoOwner"), "name": GraphQLVariable("repoName")], type: .object(Repository.selections)),
+    ]
+
+    public var snapshot: Snapshot
+
+    public init(snapshot: Snapshot) {
+      self.snapshot = snapshot
+    }
+
+    public init(repository: Repository? = nil) {
+      self.init(snapshot: ["__typename": "Query", "repository": repository.flatMap { (value: Repository) -> Snapshot in value.snapshot }])
+    }
+
+    /// Lookup a given repository by the owner and repository name.
+    public var repository: Repository? {
+      get {
+        return (snapshot["repository"] as? Snapshot).flatMap { Repository(snapshot: $0) }
+      }
+      set {
+        snapshot.updateValue(newValue?.snapshot, forKey: "repository")
+      }
+    }
+
+    public struct Repository: GraphQLSelectionSet {
+      public static let possibleTypes = ["Repository"]
+
+      public static let selections: [GraphQLSelection] = [
+        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+        GraphQLField("pullRequests", arguments: ["states": ["OPEN"], "first": 10, "after": GraphQLVariable("id"), "orderBy": ["field": "CREATED_AT", "direction": "DESC"]], type: .nonNull(.object(PullRequest.selections))),
+      ]
+
+      public var snapshot: Snapshot
+
+      public init(snapshot: Snapshot) {
+        self.snapshot = snapshot
+      }
+
+      public init(pullRequests: PullRequest) {
+        self.init(snapshot: ["__typename": "Repository", "pullRequests": pullRequests.snapshot])
+      }
+
+      public var __typename: String {
+        get {
+          return snapshot["__typename"]! as! String
+        }
+        set {
+          snapshot.updateValue(newValue, forKey: "__typename")
+        }
+      }
+
+      /// A list of pull requests that have been opened in the repository.
+      public var pullRequests: PullRequest {
+        get {
+          return PullRequest(snapshot: snapshot["pullRequests"]! as! Snapshot)
+        }
+        set {
+          snapshot.updateValue(newValue.snapshot, forKey: "pullRequests")
+        }
+      }
+
+      public struct PullRequest: GraphQLSelectionSet {
+        public static let possibleTypes = ["PullRequestConnection"]
+
+        public static let selections: [GraphQLSelection] = [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("totalCount", type: .nonNull(.scalar(Int.self))),
+          GraphQLField("pageInfo", type: .nonNull(.object(PageInfo.selections))),
+          GraphQLField("nodes", type: .list(.object(Node.selections))),
+        ]
+
+        public var snapshot: Snapshot
+
+        public init(snapshot: Snapshot) {
+          self.snapshot = snapshot
+        }
+
+        public init(totalCount: Int, pageInfo: PageInfo, nodes: [Node?]? = nil) {
+          self.init(snapshot: ["__typename": "PullRequestConnection", "totalCount": totalCount, "pageInfo": pageInfo.snapshot, "nodes": nodes.flatMap { (value: [Node?]) -> [Snapshot?] in value.map { (value: Node?) -> Snapshot? in value.flatMap { (value: Node) -> Snapshot in value.snapshot } } }])
+        }
+
+        public var __typename: String {
+          get {
+            return snapshot["__typename"]! as! String
+          }
+          set {
+            snapshot.updateValue(newValue, forKey: "__typename")
+          }
+        }
+
+        /// Identifies the total count of items in the connection.
+        public var totalCount: Int {
+          get {
+            return snapshot["totalCount"]! as! Int
+          }
+          set {
+            snapshot.updateValue(newValue, forKey: "totalCount")
+          }
+        }
+
+        /// Information to aid in pagination.
+        public var pageInfo: PageInfo {
+          get {
+            return PageInfo(snapshot: snapshot["pageInfo"]! as! Snapshot)
+          }
+          set {
+            snapshot.updateValue(newValue.snapshot, forKey: "pageInfo")
+          }
+        }
+
+        /// A list of nodes.
+        public var nodes: [Node?]? {
+          get {
+            return (snapshot["nodes"] as? [Snapshot?]).flatMap { (value: [Snapshot?]) -> [Node?] in value.map { (value: Snapshot?) -> Node? in value.flatMap { (value: Snapshot) -> Node in Node(snapshot: value) } } }
+          }
+          set {
+            snapshot.updateValue(newValue.flatMap { (value: [Node?]) -> [Snapshot?] in value.map { (value: Node?) -> Snapshot? in value.flatMap { (value: Node) -> Snapshot in value.snapshot } } }, forKey: "nodes")
+          }
+        }
+
+        public struct PageInfo: GraphQLSelectionSet {
+          public static let possibleTypes = ["PageInfo"]
+
+          public static let selections: [GraphQLSelection] = [
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("endCursor", type: .scalar(String.self)),
+            GraphQLField("startCursor", type: .scalar(String.self)),
+          ]
+
+          public var snapshot: Snapshot
+
+          public init(snapshot: Snapshot) {
+            self.snapshot = snapshot
+          }
+
+          public init(endCursor: String? = nil, startCursor: String? = nil) {
+            self.init(snapshot: ["__typename": "PageInfo", "endCursor": endCursor, "startCursor": startCursor])
+          }
+
+          public var __typename: String {
+            get {
+              return snapshot["__typename"]! as! String
+            }
+            set {
+              snapshot.updateValue(newValue, forKey: "__typename")
+            }
+          }
+
+          /// When paginating forwards, the cursor to continue.
+          public var endCursor: String? {
+            get {
+              return snapshot["endCursor"] as? String
+            }
+            set {
+              snapshot.updateValue(newValue, forKey: "endCursor")
+            }
+          }
+
+          /// When paginating backwards, the cursor to continue.
+          public var startCursor: String? {
+            get {
+              return snapshot["startCursor"] as? String
+            }
+            set {
+              snapshot.updateValue(newValue, forKey: "startCursor")
+            }
+          }
+        }
+
+        public struct Node: GraphQLSelectionSet {
+          public static let possibleTypes = ["PullRequest"]
+
+          public static let selections: [GraphQLSelection] = [
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("title", type: .nonNull(.scalar(String.self))),
+            GraphQLField("body", type: .nonNull(.scalar(String.self))),
+            GraphQLField("author", type: .object(Author.selections)),
+          ]
+
+          public var snapshot: Snapshot
+
+          public init(snapshot: Snapshot) {
+            self.snapshot = snapshot
+          }
+
+          public init(title: String, body: String, author: Author? = nil) {
+            self.init(snapshot: ["__typename": "PullRequest", "title": title, "body": body, "author": author.flatMap { (value: Author) -> Snapshot in value.snapshot }])
+          }
+
+          public var __typename: String {
+            get {
+              return snapshot["__typename"]! as! String
+            }
+            set {
+              snapshot.updateValue(newValue, forKey: "__typename")
+            }
+          }
+
+          /// Identifies the pull request title.
+          public var title: String {
+            get {
+              return snapshot["title"]! as! String
+            }
+            set {
+              snapshot.updateValue(newValue, forKey: "title")
+            }
+          }
+
+          /// The body as Markdown.
+          public var body: String {
+            get {
+              return snapshot["body"]! as! String
+            }
+            set {
+              snapshot.updateValue(newValue, forKey: "body")
+            }
+          }
+
+          /// The actor who authored the comment.
+          public var author: Author? {
+            get {
+              return (snapshot["author"] as? Snapshot).flatMap { Author(snapshot: $0) }
+            }
+            set {
+              snapshot.updateValue(newValue?.snapshot, forKey: "author")
+            }
+          }
+
+          public struct Author: GraphQLSelectionSet {
+            public static let possibleTypes = ["Organization", "User", "Bot"]
+
+            public static let selections: [GraphQLSelection] = [
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+              GraphQLField("login", type: .nonNull(.scalar(String.self))),
+              GraphQLField("avatarUrl", type: .nonNull(.scalar(String.self))),
+            ]
+
+            public var snapshot: Snapshot
+
+            public init(snapshot: Snapshot) {
+              self.snapshot = snapshot
+            }
+
+            public static func makeOrganization(login: String, avatarUrl: String) -> Author {
+              return Author(snapshot: ["__typename": "Organization", "login": login, "avatarUrl": avatarUrl])
+            }
+
+            public static func makeUser(login: String, avatarUrl: String) -> Author {
+              return Author(snapshot: ["__typename": "User", "login": login, "avatarUrl": avatarUrl])
+            }
+
+            public static func makeBot(login: String, avatarUrl: String) -> Author {
+              return Author(snapshot: ["__typename": "Bot", "login": login, "avatarUrl": avatarUrl])
+            }
+
+            public var __typename: String {
+              get {
+                return snapshot["__typename"]! as! String
+              }
+              set {
+                snapshot.updateValue(newValue, forKey: "__typename")
+              }
+            }
+
+            /// The username of the actor.
+            public var login: String {
+              get {
+                return snapshot["login"]! as! String
+              }
+              set {
+                snapshot.updateValue(newValue, forKey: "login")
+              }
+            }
+
+            /// A URL pointing to the actor's public avatar.
+            public var avatarUrl: String {
+              get {
+                return snapshot["avatarUrl"]! as! String
+              }
+              set {
+                snapshot.updateValue(newValue, forKey: "avatarUrl")
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+public final class SearchRepoByLanguageQuery: GraphQLQuery {
+  public static let operationString =
+    "query searchRepoByLanguage($queryString: String!, $cursor: String) {\n  search(query: $queryString, type: REPOSITORY, first: 10, after: $cursor) {\n    __typename\n    repositoryCount\n    edges {\n      __typename\n      cursor\n      node {\n        __typename\n        ... on Repository {\n          name\n          nameWithOwner\n          ...owner\n          description\n          stargazers {\n            __typename\n            totalCount\n          }\n          forks {\n            __typename\n            totalCount\n          }\n          updatedAt\n        }\n      }\n    }\n  }\n}"
 
   public static var requestString: String { return operationString.appending(Owner.fragmentString) }
 

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		454059DCCB23E3FEE13C3F29 /* Pods_gitGraph.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F6C0AC21F1FD504FB4D7C91 /* Pods_gitGraph.framework */; };
+		6FECD9BF20E11C4C001BF597 /* prList.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 6FECD9BE20E11C4C001BF597 /* prList.graphql */; };
 		6FFF5CDC20DBC79B002E7526 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FFF5CDB20DBC79B002E7526 /* AppDelegate.swift */; };
 		6FFF5CDE20DBC79B002E7526 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FFF5CDD20DBC79B002E7526 /* ViewController.swift */; };
 		6FFF5CE120DBC79B002E7526 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6FFF5CDF20DBC79B002E7526 /* Main.storyboard */; };
@@ -15,7 +16,7 @@
 		6FFF5CE620DBC79B002E7526 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6FFF5CE420DBC79B002E7526 /* LaunchScreen.storyboard */; };
 		6FFF5CF120DBC79B002E7526 /* gitGraphTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FFF5CF020DBC79B002E7526 /* gitGraphTests.swift */; };
 		6FFF5CFD20DBC7C1002E7526 /* schema.json in Resources */ = {isa = PBXBuildFile; fileRef = 6FFF5CFC20DBC7C0002E7526 /* schema.json */; };
-		6FFF5D0020DBCB5B002E7526 /* list.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 6FFF5CFF20DBCB5B002E7526 /* list.graphql */; };
+		6FFF5D0020DBCB5B002E7526 /* repoList.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 6FFF5CFF20DBCB5B002E7526 /* repoList.graphql */; };
 		6FFF5D0220DBCB9A002E7526 /* API.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FFF5D0120DBCB9A002E7526 /* API.swift */; };
 		F0DAA5197233502F96B3B41D /* Pods_gitGraphTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E1B594C4526E8F0C6823D7D0 /* Pods_gitGraphTests.framework */; };
 /* End PBXBuildFile section */
@@ -32,6 +33,7 @@
 
 /* Begin PBXFileReference section */
 		181D3276D36BDB433EB27971 /* Pods-gitGraph.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-gitGraph.release.xcconfig"; path = "Pods/Target Support Files/Pods-gitGraph/Pods-gitGraph.release.xcconfig"; sourceTree = "<group>"; };
+		6FECD9BE20E11C4C001BF597 /* prList.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = prList.graphql; sourceTree = "<group>"; };
 		6FFF5CD820DBC79B002E7526 /* gitGraph.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = gitGraph.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6FFF5CDB20DBC79B002E7526 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		6FFF5CDD20DBC79B002E7526 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -43,7 +45,7 @@
 		6FFF5CF020DBC79B002E7526 /* gitGraphTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = gitGraphTests.swift; sourceTree = "<group>"; };
 		6FFF5CF220DBC79B002E7526 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		6FFF5CFC20DBC7C0002E7526 /* schema.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = schema.json; sourceTree = "<group>"; };
-		6FFF5CFF20DBCB5B002E7526 /* list.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = list.graphql; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.javascript; };
+		6FFF5CFF20DBCB5B002E7526 /* repoList.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = repoList.graphql; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.javascript; };
 		6FFF5D0120DBCB9A002E7526 /* API.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = API.swift; sourceTree = "<group>"; };
 		7F6C0AC21F1FD504FB4D7C91 /* Pods_gitGraph.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_gitGraph.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEBDE37B6E669F135ABFE77F /* Pods-gitGraphTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-gitGraphTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-gitGraphTests/Pods-gitGraphTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -140,7 +142,8 @@
 			isa = PBXGroup;
 			children = (
 				6FFF5CE220DBC79B002E7526 /* Assets.xcassets */,
-				6FFF5CFF20DBCB5B002E7526 /* list.graphql */,
+				6FFF5CFF20DBCB5B002E7526 /* repoList.graphql */,
+				6FECD9BE20E11C4C001BF597 /* prList.graphql */,
 			);
 			path = Support;
 			sourceTree = "<group>";
@@ -236,8 +239,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				6FFF5CFD20DBC7C1002E7526 /* schema.json in Resources */,
+				6FECD9BF20E11C4C001BF597 /* prList.graphql in Resources */,
 				6FFF5CE620DBC79B002E7526 /* LaunchScreen.storyboard in Resources */,
-				6FFF5D0020DBCB5B002E7526 /* list.graphql in Resources */,
+				6FFF5D0020DBCB5B002E7526 /* repoList.graphql in Resources */,
 				6FFF5CE320DBC79B002E7526 /* Assets.xcassets in Resources */,
 				6FFF5CE120DBC79B002E7526 /* Main.storyboard in Resources */,
 			);

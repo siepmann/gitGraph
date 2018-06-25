@@ -1,0 +1,19 @@
+query listRepoPullRequest($repoOwner: String!, $repoName:String!, $id: String){
+    repository(owner: $repoOwner, name: $repoName) {
+        pullRequests(states:[OPEN], first: 10, after: $id, orderBy: {field: CREATED_AT, direction: DESC}) {
+            totalCount,
+            pageInfo {
+                endCursor
+                startCursor
+            },
+            nodes {
+                title,
+                body,
+                author {
+                    login,
+                    avatarUrl
+                }
+            }
+        }
+    }
+}
