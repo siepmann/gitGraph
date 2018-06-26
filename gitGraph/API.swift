@@ -315,9 +315,9 @@ public final class ListRepoPullRequestQuery: GraphQLQuery {
 
 public final class SearchRepoByLanguageQuery: GraphQLQuery {
   public static let operationString =
-    "query searchRepoByLanguage($queryString: String!, $cursor: String) {\n  search(query: $queryString, type: REPOSITORY, first: 10, after: $cursor) {\n    __typename\n    repositoryCount\n    edges {\n      __typename\n      cursor\n      node {\n        __typename\n        ... on Repository {\n          name\n          nameWithOwner\n          ...owner\n          description\n          stargazers {\n            __typename\n            totalCount\n          }\n          forks {\n            __typename\n            totalCount\n          }\n          updatedAt\n        }\n      }\n    }\n  }\n}"
+    "query searchRepoByLanguage($queryString: String!, $cursor: String) {\n  search(query: $queryString, type: REPOSITORY, first: 10, after: $cursor) {\n    __typename\n    repositoryCount\n    edges {\n      __typename\n      cursor\n      node {\n        __typename\n        ...repository\n      }\n    }\n  }\n}"
 
-  public static var requestString: String { return operationString.appending(Owner.fragmentString) }
+  public static var requestString: String { return operationString.appending(Repository.fragmentString).appending(Owner.fragmentString) }
 
   public var queryString: String
   public var cursor: String?
@@ -462,6 +462,7 @@ public final class SearchRepoByLanguageQuery: GraphQLQuery {
               variants: ["Repository": AsRepository.selections],
               default: [
                 GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+                GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
               ]
             )
           ]
@@ -492,8 +493,8 @@ public final class SearchRepoByLanguageQuery: GraphQLQuery {
             return Node(snapshot: ["__typename": "MarketplaceListing"])
           }
 
-          public static func makeRepository(name: String, nameWithOwner: String, owner: AsRepository.Owner, description: String? = nil, stargazers: AsRepository.Stargazer, forks: AsRepository.Fork, updatedAt: String) -> Node {
-            return Node(snapshot: ["__typename": "Repository", "name": name, "nameWithOwner": nameWithOwner, "owner": owner.snapshot, "description": description, "stargazers": stargazers.snapshot, "forks": forks.snapshot, "updatedAt": updatedAt])
+          public static func makeRepository(name: String, nameWithOwner: String, owner: AsRepository.Owner, descriptionHtml: String, stargazers: AsRepository.Stargazer, forks: AsRepository.Fork, updatedAt: String) -> Node {
+            return Node(snapshot: ["__typename": "Repository", "name": name, "nameWithOwner": nameWithOwner, "owner": owner.snapshot, "descriptionHTML": descriptionHtml, "stargazers": stargazers.snapshot, "forks": forks.snapshot, "updatedAt": updatedAt])
           }
 
           public var __typename: String {
@@ -502,6 +503,28 @@ public final class SearchRepoByLanguageQuery: GraphQLQuery {
             }
             set {
               snapshot.updateValue(newValue, forKey: "__typename")
+            }
+          }
+
+          public var fragments: Fragments {
+            get {
+              return Fragments(snapshot: snapshot)
+            }
+            set {
+              snapshot += newValue.snapshot
+            }
+          }
+
+          public struct Fragments {
+            public var snapshot: Snapshot
+
+            public var repository: Repository {
+              get {
+                return Repository(snapshot: snapshot)
+              }
+              set {
+                snapshot += newValue.snapshot
+              }
             }
           }
 
@@ -521,11 +544,13 @@ public final class SearchRepoByLanguageQuery: GraphQLQuery {
 
             public static let selections: [GraphQLSelection] = [
               GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
               GraphQLField("name", type: .nonNull(.scalar(String.self))),
               GraphQLField("nameWithOwner", type: .nonNull(.scalar(String.self))),
               GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
               GraphQLField("owner", type: .nonNull(.object(Owner.selections))),
-              GraphQLField("description", type: .scalar(String.self)),
+              GraphQLField("descriptionHTML", type: .nonNull(.scalar(String.self))),
               GraphQLField("stargazers", type: .nonNull(.object(Stargazer.selections))),
               GraphQLField("forks", type: .nonNull(.object(Fork.selections))),
               GraphQLField("updatedAt", type: .nonNull(.scalar(String.self))),
@@ -537,8 +562,8 @@ public final class SearchRepoByLanguageQuery: GraphQLQuery {
               self.snapshot = snapshot
             }
 
-            public init(name: String, nameWithOwner: String, owner: Owner, description: String? = nil, stargazers: Stargazer, forks: Fork, updatedAt: String) {
-              self.init(snapshot: ["__typename": "Repository", "name": name, "nameWithOwner": nameWithOwner, "owner": owner.snapshot, "description": description, "stargazers": stargazers.snapshot, "forks": forks.snapshot, "updatedAt": updatedAt])
+            public init(name: String, nameWithOwner: String, owner: Owner, descriptionHtml: String, stargazers: Stargazer, forks: Fork, updatedAt: String) {
+              self.init(snapshot: ["__typename": "Repository", "name": name, "nameWithOwner": nameWithOwner, "owner": owner.snapshot, "descriptionHTML": descriptionHtml, "stargazers": stargazers.snapshot, "forks": forks.snapshot, "updatedAt": updatedAt])
             }
 
             public var __typename: String {
@@ -580,13 +605,13 @@ public final class SearchRepoByLanguageQuery: GraphQLQuery {
               }
             }
 
-            /// The description of the repository.
-            public var description: String? {
+            /// The description of the repository rendered to HTML.
+            public var descriptionHtml: String {
               get {
-                return snapshot["description"] as? String
+                return snapshot["descriptionHTML"]! as! String
               }
               set {
-                snapshot.updateValue(newValue, forKey: "description")
+                snapshot.updateValue(newValue, forKey: "descriptionHTML")
               }
             }
 
@@ -631,6 +656,15 @@ public final class SearchRepoByLanguageQuery: GraphQLQuery {
 
             public struct Fragments {
               public var snapshot: Snapshot
+
+              public var repository: Repository {
+                get {
+                  return Repository(snapshot: snapshot)
+                }
+                set {
+                  snapshot += newValue.snapshot
+                }
+              }
 
               public var owner: Owner {
                 get {
@@ -886,6 +920,638 @@ public struct Owner: GraphQLFragment {
       }
       set {
         snapshot.updateValue(newValue, forKey: "avatarUrl")
+      }
+    }
+  }
+}
+
+public struct Repository: GraphQLFragment {
+  public static let fragmentString =
+    "fragment repository on Node {\n  __typename\n  ... on Repository {\n    name\n    nameWithOwner\n    ...owner\n    descriptionHTML\n    stargazers {\n      __typename\n      totalCount\n    }\n    forks {\n      __typename\n      totalCount\n    }\n    updatedAt\n  }\n}"
+
+  public static let possibleTypes = ["License", "MarketplaceCategory", "MarketplaceListing", "Organization", "Project", "ProjectColumn", "ProjectCard", "Issue", "User", "Repository", "CommitComment", "UserContentEdit", "Reaction", "Commit", "Status", "StatusContext", "Tree", "Ref", "PullRequest", "Label", "IssueComment", "PullRequestCommit", "Milestone", "ReviewRequest", "Team", "OrganizationInvitation", "PullRequestReview", "PullRequestReviewComment", "CommitCommentThread", "PullRequestReviewThread", "ClosedEvent", "ReopenedEvent", "SubscribedEvent", "UnsubscribedEvent", "MergedEvent", "ReferencedEvent", "CrossReferencedEvent", "AssignedEvent", "UnassignedEvent", "LabeledEvent", "UnlabeledEvent", "MilestonedEvent", "DemilestonedEvent", "RenamedTitleEvent", "LockedEvent", "UnlockedEvent", "DeployedEvent", "Deployment", "DeploymentStatus", "HeadRefDeletedEvent", "HeadRefRestoredEvent", "HeadRefForcePushedEvent", "BaseRefForcePushedEvent", "ReviewRequestedEvent", "ReviewRequestRemovedEvent", "ReviewDismissedEvent", "DeployKey", "Language", "ProtectedBranch", "PushAllowance", "ReviewDismissalAllowance", "Release", "ReleaseAsset", "RepositoryTopic", "Topic", "Gist", "GistComment", "PublicKey", "OrganizationIdentityProvider", "ExternalIdentity", "Blob", "Bot", "RepositoryInvitation", "BaseRefChangedEvent", "AddedToProjectEvent", "CommentDeletedEvent", "ConvertedNoteToIssueEvent", "MentionedEvent", "MovedColumnsInProjectEvent", "RemovedFromProjectEvent", "Tag"]
+
+  public static let selections: [GraphQLSelection] = [
+    GraphQLTypeCase(
+      variants: ["Repository": AsRepository.selections],
+      default: [
+        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+      ]
+    )
+  ]
+
+  public var snapshot: Snapshot
+
+  public init(snapshot: Snapshot) {
+    self.snapshot = snapshot
+  }
+
+  public static func makeLicense() -> Repository {
+    return Repository(snapshot: ["__typename": "License"])
+  }
+
+  public static func makeMarketplaceCategory() -> Repository {
+    return Repository(snapshot: ["__typename": "MarketplaceCategory"])
+  }
+
+  public static func makeMarketplaceListing() -> Repository {
+    return Repository(snapshot: ["__typename": "MarketplaceListing"])
+  }
+
+  public static func makeOrganization() -> Repository {
+    return Repository(snapshot: ["__typename": "Organization"])
+  }
+
+  public static func makeProject() -> Repository {
+    return Repository(snapshot: ["__typename": "Project"])
+  }
+
+  public static func makeProjectColumn() -> Repository {
+    return Repository(snapshot: ["__typename": "ProjectColumn"])
+  }
+
+  public static func makeProjectCard() -> Repository {
+    return Repository(snapshot: ["__typename": "ProjectCard"])
+  }
+
+  public static func makeIssue() -> Repository {
+    return Repository(snapshot: ["__typename": "Issue"])
+  }
+
+  public static func makeUser() -> Repository {
+    return Repository(snapshot: ["__typename": "User"])
+  }
+
+  public static func makeCommitComment() -> Repository {
+    return Repository(snapshot: ["__typename": "CommitComment"])
+  }
+
+  public static func makeUserContentEdit() -> Repository {
+    return Repository(snapshot: ["__typename": "UserContentEdit"])
+  }
+
+  public static func makeReaction() -> Repository {
+    return Repository(snapshot: ["__typename": "Reaction"])
+  }
+
+  public static func makeCommit() -> Repository {
+    return Repository(snapshot: ["__typename": "Commit"])
+  }
+
+  public static func makeStatus() -> Repository {
+    return Repository(snapshot: ["__typename": "Status"])
+  }
+
+  public static func makeStatusContext() -> Repository {
+    return Repository(snapshot: ["__typename": "StatusContext"])
+  }
+
+  public static func makeTree() -> Repository {
+    return Repository(snapshot: ["__typename": "Tree"])
+  }
+
+  public static func makeRef() -> Repository {
+    return Repository(snapshot: ["__typename": "Ref"])
+  }
+
+  public static func makePullRequest() -> Repository {
+    return Repository(snapshot: ["__typename": "PullRequest"])
+  }
+
+  public static func makeLabel() -> Repository {
+    return Repository(snapshot: ["__typename": "Label"])
+  }
+
+  public static func makeIssueComment() -> Repository {
+    return Repository(snapshot: ["__typename": "IssueComment"])
+  }
+
+  public static func makePullRequestCommit() -> Repository {
+    return Repository(snapshot: ["__typename": "PullRequestCommit"])
+  }
+
+  public static func makeMilestone() -> Repository {
+    return Repository(snapshot: ["__typename": "Milestone"])
+  }
+
+  public static func makeReviewRequest() -> Repository {
+    return Repository(snapshot: ["__typename": "ReviewRequest"])
+  }
+
+  public static func makeTeam() -> Repository {
+    return Repository(snapshot: ["__typename": "Team"])
+  }
+
+  public static func makeOrganizationInvitation() -> Repository {
+    return Repository(snapshot: ["__typename": "OrganizationInvitation"])
+  }
+
+  public static func makePullRequestReview() -> Repository {
+    return Repository(snapshot: ["__typename": "PullRequestReview"])
+  }
+
+  public static func makePullRequestReviewComment() -> Repository {
+    return Repository(snapshot: ["__typename": "PullRequestReviewComment"])
+  }
+
+  public static func makeCommitCommentThread() -> Repository {
+    return Repository(snapshot: ["__typename": "CommitCommentThread"])
+  }
+
+  public static func makePullRequestReviewThread() -> Repository {
+    return Repository(snapshot: ["__typename": "PullRequestReviewThread"])
+  }
+
+  public static func makeClosedEvent() -> Repository {
+    return Repository(snapshot: ["__typename": "ClosedEvent"])
+  }
+
+  public static func makeReopenedEvent() -> Repository {
+    return Repository(snapshot: ["__typename": "ReopenedEvent"])
+  }
+
+  public static func makeSubscribedEvent() -> Repository {
+    return Repository(snapshot: ["__typename": "SubscribedEvent"])
+  }
+
+  public static func makeUnsubscribedEvent() -> Repository {
+    return Repository(snapshot: ["__typename": "UnsubscribedEvent"])
+  }
+
+  public static func makeMergedEvent() -> Repository {
+    return Repository(snapshot: ["__typename": "MergedEvent"])
+  }
+
+  public static func makeReferencedEvent() -> Repository {
+    return Repository(snapshot: ["__typename": "ReferencedEvent"])
+  }
+
+  public static func makeCrossReferencedEvent() -> Repository {
+    return Repository(snapshot: ["__typename": "CrossReferencedEvent"])
+  }
+
+  public static func makeAssignedEvent() -> Repository {
+    return Repository(snapshot: ["__typename": "AssignedEvent"])
+  }
+
+  public static func makeUnassignedEvent() -> Repository {
+    return Repository(snapshot: ["__typename": "UnassignedEvent"])
+  }
+
+  public static func makeLabeledEvent() -> Repository {
+    return Repository(snapshot: ["__typename": "LabeledEvent"])
+  }
+
+  public static func makeUnlabeledEvent() -> Repository {
+    return Repository(snapshot: ["__typename": "UnlabeledEvent"])
+  }
+
+  public static func makeMilestonedEvent() -> Repository {
+    return Repository(snapshot: ["__typename": "MilestonedEvent"])
+  }
+
+  public static func makeDemilestonedEvent() -> Repository {
+    return Repository(snapshot: ["__typename": "DemilestonedEvent"])
+  }
+
+  public static func makeRenamedTitleEvent() -> Repository {
+    return Repository(snapshot: ["__typename": "RenamedTitleEvent"])
+  }
+
+  public static func makeLockedEvent() -> Repository {
+    return Repository(snapshot: ["__typename": "LockedEvent"])
+  }
+
+  public static func makeUnlockedEvent() -> Repository {
+    return Repository(snapshot: ["__typename": "UnlockedEvent"])
+  }
+
+  public static func makeDeployedEvent() -> Repository {
+    return Repository(snapshot: ["__typename": "DeployedEvent"])
+  }
+
+  public static func makeDeployment() -> Repository {
+    return Repository(snapshot: ["__typename": "Deployment"])
+  }
+
+  public static func makeDeploymentStatus() -> Repository {
+    return Repository(snapshot: ["__typename": "DeploymentStatus"])
+  }
+
+  public static func makeHeadRefDeletedEvent() -> Repository {
+    return Repository(snapshot: ["__typename": "HeadRefDeletedEvent"])
+  }
+
+  public static func makeHeadRefRestoredEvent() -> Repository {
+    return Repository(snapshot: ["__typename": "HeadRefRestoredEvent"])
+  }
+
+  public static func makeHeadRefForcePushedEvent() -> Repository {
+    return Repository(snapshot: ["__typename": "HeadRefForcePushedEvent"])
+  }
+
+  public static func makeBaseRefForcePushedEvent() -> Repository {
+    return Repository(snapshot: ["__typename": "BaseRefForcePushedEvent"])
+  }
+
+  public static func makeReviewRequestedEvent() -> Repository {
+    return Repository(snapshot: ["__typename": "ReviewRequestedEvent"])
+  }
+
+  public static func makeReviewRequestRemovedEvent() -> Repository {
+    return Repository(snapshot: ["__typename": "ReviewRequestRemovedEvent"])
+  }
+
+  public static func makeReviewDismissedEvent() -> Repository {
+    return Repository(snapshot: ["__typename": "ReviewDismissedEvent"])
+  }
+
+  public static func makeDeployKey() -> Repository {
+    return Repository(snapshot: ["__typename": "DeployKey"])
+  }
+
+  public static func makeLanguage() -> Repository {
+    return Repository(snapshot: ["__typename": "Language"])
+  }
+
+  public static func makeProtectedBranch() -> Repository {
+    return Repository(snapshot: ["__typename": "ProtectedBranch"])
+  }
+
+  public static func makePushAllowance() -> Repository {
+    return Repository(snapshot: ["__typename": "PushAllowance"])
+  }
+
+  public static func makeReviewDismissalAllowance() -> Repository {
+    return Repository(snapshot: ["__typename": "ReviewDismissalAllowance"])
+  }
+
+  public static func makeRelease() -> Repository {
+    return Repository(snapshot: ["__typename": "Release"])
+  }
+
+  public static func makeReleaseAsset() -> Repository {
+    return Repository(snapshot: ["__typename": "ReleaseAsset"])
+  }
+
+  public static func makeRepositoryTopic() -> Repository {
+    return Repository(snapshot: ["__typename": "RepositoryTopic"])
+  }
+
+  public static func makeTopic() -> Repository {
+    return Repository(snapshot: ["__typename": "Topic"])
+  }
+
+  public static func makeGist() -> Repository {
+    return Repository(snapshot: ["__typename": "Gist"])
+  }
+
+  public static func makeGistComment() -> Repository {
+    return Repository(snapshot: ["__typename": "GistComment"])
+  }
+
+  public static func makePublicKey() -> Repository {
+    return Repository(snapshot: ["__typename": "PublicKey"])
+  }
+
+  public static func makeOrganizationIdentityProvider() -> Repository {
+    return Repository(snapshot: ["__typename": "OrganizationIdentityProvider"])
+  }
+
+  public static func makeExternalIdentity() -> Repository {
+    return Repository(snapshot: ["__typename": "ExternalIdentity"])
+  }
+
+  public static func makeBlob() -> Repository {
+    return Repository(snapshot: ["__typename": "Blob"])
+  }
+
+  public static func makeBot() -> Repository {
+    return Repository(snapshot: ["__typename": "Bot"])
+  }
+
+  public static func makeRepositoryInvitation() -> Repository {
+    return Repository(snapshot: ["__typename": "RepositoryInvitation"])
+  }
+
+  public static func makeBaseRefChangedEvent() -> Repository {
+    return Repository(snapshot: ["__typename": "BaseRefChangedEvent"])
+  }
+
+  public static func makeAddedToProjectEvent() -> Repository {
+    return Repository(snapshot: ["__typename": "AddedToProjectEvent"])
+  }
+
+  public static func makeCommentDeletedEvent() -> Repository {
+    return Repository(snapshot: ["__typename": "CommentDeletedEvent"])
+  }
+
+  public static func makeConvertedNoteToIssueEvent() -> Repository {
+    return Repository(snapshot: ["__typename": "ConvertedNoteToIssueEvent"])
+  }
+
+  public static func makeMentionedEvent() -> Repository {
+    return Repository(snapshot: ["__typename": "MentionedEvent"])
+  }
+
+  public static func makeMovedColumnsInProjectEvent() -> Repository {
+    return Repository(snapshot: ["__typename": "MovedColumnsInProjectEvent"])
+  }
+
+  public static func makeRemovedFromProjectEvent() -> Repository {
+    return Repository(snapshot: ["__typename": "RemovedFromProjectEvent"])
+  }
+
+  public static func makeTag() -> Repository {
+    return Repository(snapshot: ["__typename": "Tag"])
+  }
+
+  public static func makeRepository(name: String, nameWithOwner: String, owner: AsRepository.Owner, descriptionHtml: String, stargazers: AsRepository.Stargazer, forks: AsRepository.Fork, updatedAt: String) -> Repository {
+    return Repository(snapshot: ["__typename": "Repository", "name": name, "nameWithOwner": nameWithOwner, "owner": owner.snapshot, "descriptionHTML": descriptionHtml, "stargazers": stargazers.snapshot, "forks": forks.snapshot, "updatedAt": updatedAt])
+  }
+
+  public var __typename: String {
+    get {
+      return snapshot["__typename"]! as! String
+    }
+    set {
+      snapshot.updateValue(newValue, forKey: "__typename")
+    }
+  }
+
+  public var asRepository: AsRepository? {
+    get {
+      if !AsRepository.possibleTypes.contains(__typename) { return nil }
+      return AsRepository(snapshot: snapshot)
+    }
+    set {
+      guard let newValue = newValue else { return }
+      snapshot = newValue.snapshot
+    }
+  }
+
+  public struct AsRepository: GraphQLSelectionSet {
+    public static let possibleTypes = ["Repository"]
+
+    public static let selections: [GraphQLSelection] = [
+      GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+      GraphQLField("name", type: .nonNull(.scalar(String.self))),
+      GraphQLField("nameWithOwner", type: .nonNull(.scalar(String.self))),
+      GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+      GraphQLField("owner", type: .nonNull(.object(Owner.selections))),
+      GraphQLField("descriptionHTML", type: .nonNull(.scalar(String.self))),
+      GraphQLField("stargazers", type: .nonNull(.object(Stargazer.selections))),
+      GraphQLField("forks", type: .nonNull(.object(Fork.selections))),
+      GraphQLField("updatedAt", type: .nonNull(.scalar(String.self))),
+    ]
+
+    public var snapshot: Snapshot
+
+    public init(snapshot: Snapshot) {
+      self.snapshot = snapshot
+    }
+
+    public init(name: String, nameWithOwner: String, owner: Owner, descriptionHtml: String, stargazers: Stargazer, forks: Fork, updatedAt: String) {
+      self.init(snapshot: ["__typename": "Repository", "name": name, "nameWithOwner": nameWithOwner, "owner": owner.snapshot, "descriptionHTML": descriptionHtml, "stargazers": stargazers.snapshot, "forks": forks.snapshot, "updatedAt": updatedAt])
+    }
+
+    public var __typename: String {
+      get {
+        return snapshot["__typename"]! as! String
+      }
+      set {
+        snapshot.updateValue(newValue, forKey: "__typename")
+      }
+    }
+
+    /// The name of the repository.
+    public var name: String {
+      get {
+        return snapshot["name"]! as! String
+      }
+      set {
+        snapshot.updateValue(newValue, forKey: "name")
+      }
+    }
+
+    /// The repository's name with owner.
+    public var nameWithOwner: String {
+      get {
+        return snapshot["nameWithOwner"]! as! String
+      }
+      set {
+        snapshot.updateValue(newValue, forKey: "nameWithOwner")
+      }
+    }
+
+    /// The User owner of the repository.
+    public var owner: Owner {
+      get {
+        return Owner(snapshot: snapshot["owner"]! as! Snapshot)
+      }
+      set {
+        snapshot.updateValue(newValue.snapshot, forKey: "owner")
+      }
+    }
+
+    /// The description of the repository rendered to HTML.
+    public var descriptionHtml: String {
+      get {
+        return snapshot["descriptionHTML"]! as! String
+      }
+      set {
+        snapshot.updateValue(newValue, forKey: "descriptionHTML")
+      }
+    }
+
+    /// A list of users who have starred this starrable.
+    public var stargazers: Stargazer {
+      get {
+        return Stargazer(snapshot: snapshot["stargazers"]! as! Snapshot)
+      }
+      set {
+        snapshot.updateValue(newValue.snapshot, forKey: "stargazers")
+      }
+    }
+
+    /// A list of direct forked repositories.
+    public var forks: Fork {
+      get {
+        return Fork(snapshot: snapshot["forks"]! as! Snapshot)
+      }
+      set {
+        snapshot.updateValue(newValue.snapshot, forKey: "forks")
+      }
+    }
+
+    /// Identifies the date and time when the object was last updated.
+    public var updatedAt: String {
+      get {
+        return snapshot["updatedAt"]! as! String
+      }
+      set {
+        snapshot.updateValue(newValue, forKey: "updatedAt")
+      }
+    }
+
+    public var fragments: Fragments {
+      get {
+        return Fragments(snapshot: snapshot)
+      }
+      set {
+        snapshot += newValue.snapshot
+      }
+    }
+
+    public struct Fragments {
+      public var snapshot: Snapshot
+
+      public var owner: Owner {
+        get {
+          return Owner(snapshot: snapshot)
+        }
+        set {
+          snapshot += newValue.snapshot
+        }
+      }
+    }
+
+    public struct Owner: GraphQLSelectionSet {
+      public static let possibleTypes = ["Organization", "User"]
+
+      public static let selections: [GraphQLSelection] = [
+        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+        GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
+        GraphQLField("login", type: .nonNull(.scalar(String.self))),
+        GraphQLField("avatarUrl", type: .nonNull(.scalar(String.self))),
+      ]
+
+      public var snapshot: Snapshot
+
+      public init(snapshot: Snapshot) {
+        self.snapshot = snapshot
+      }
+
+      public static func makeOrganization(id: GraphQLID, login: String, avatarUrl: String) -> Owner {
+        return Owner(snapshot: ["__typename": "Organization", "id": id, "login": login, "avatarUrl": avatarUrl])
+      }
+
+      public static func makeUser(id: GraphQLID, login: String, avatarUrl: String) -> Owner {
+        return Owner(snapshot: ["__typename": "User", "id": id, "login": login, "avatarUrl": avatarUrl])
+      }
+
+      public var __typename: String {
+        get {
+          return snapshot["__typename"]! as! String
+        }
+        set {
+          snapshot.updateValue(newValue, forKey: "__typename")
+        }
+      }
+
+      public var id: GraphQLID {
+        get {
+          return snapshot["id"]! as! GraphQLID
+        }
+        set {
+          snapshot.updateValue(newValue, forKey: "id")
+        }
+      }
+
+      /// The username used to login.
+      public var login: String {
+        get {
+          return snapshot["login"]! as! String
+        }
+        set {
+          snapshot.updateValue(newValue, forKey: "login")
+        }
+      }
+
+      /// A URL pointing to the owner's public avatar.
+      public var avatarUrl: String {
+        get {
+          return snapshot["avatarUrl"]! as! String
+        }
+        set {
+          snapshot.updateValue(newValue, forKey: "avatarUrl")
+        }
+      }
+    }
+
+    public struct Stargazer: GraphQLSelectionSet {
+      public static let possibleTypes = ["StargazerConnection"]
+
+      public static let selections: [GraphQLSelection] = [
+        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+        GraphQLField("totalCount", type: .nonNull(.scalar(Int.self))),
+      ]
+
+      public var snapshot: Snapshot
+
+      public init(snapshot: Snapshot) {
+        self.snapshot = snapshot
+      }
+
+      public init(totalCount: Int) {
+        self.init(snapshot: ["__typename": "StargazerConnection", "totalCount": totalCount])
+      }
+
+      public var __typename: String {
+        get {
+          return snapshot["__typename"]! as! String
+        }
+        set {
+          snapshot.updateValue(newValue, forKey: "__typename")
+        }
+      }
+
+      /// Identifies the total count of items in the connection.
+      public var totalCount: Int {
+        get {
+          return snapshot["totalCount"]! as! Int
+        }
+        set {
+          snapshot.updateValue(newValue, forKey: "totalCount")
+        }
+      }
+    }
+
+    public struct Fork: GraphQLSelectionSet {
+      public static let possibleTypes = ["RepositoryConnection"]
+
+      public static let selections: [GraphQLSelection] = [
+        GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+        GraphQLField("totalCount", type: .nonNull(.scalar(Int.self))),
+      ]
+
+      public var snapshot: Snapshot
+
+      public init(snapshot: Snapshot) {
+        self.snapshot = snapshot
+      }
+
+      public init(totalCount: Int) {
+        self.init(snapshot: ["__typename": "RepositoryConnection", "totalCount": totalCount])
+      }
+
+      public var __typename: String {
+        get {
+          return snapshot["__typename"]! as! String
+        }
+        set {
+          snapshot.updateValue(newValue, forKey: "__typename")
+        }
+      }
+
+      /// Identifies the total count of items in the connection.
+      public var totalCount: Int {
+        get {
+          return snapshot["totalCount"]! as! Int
+        }
+        set {
+          snapshot.updateValue(newValue, forKey: "totalCount")
+        }
       }
     }
   }

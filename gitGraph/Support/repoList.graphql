@@ -1,8 +1,24 @@
 fragment owner on Repository {
     owner {
-        id,
-        login,
+        id
+        login
         avatarUrl
+    }
+}
+
+fragment repository on Node {
+    ... on Repository {
+        name
+        nameWithOwner
+        ...owner
+        descriptionHTML
+        stargazers {
+            totalCount
+        }
+        forks {
+            totalCount
+        }
+        updatedAt
     }
 }
 
@@ -12,20 +28,9 @@ query searchRepoByLanguage($queryString: String!, $cursor: String) {
         edges {
             cursor
             node {
-                ... on Repository {
-                    name,
-                    nameWithOwner,
-                    ...owner,
-                    description,
-                    stargazers {
-                        totalCount
-                    },
-                    forks {
-                        totalCount
-                    }
-                    updatedAt
-                }
+                ...repository
             }
         }
     }
 }
+
