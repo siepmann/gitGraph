@@ -1,3 +1,12 @@
+fragment pullRequests on PullRequest {
+    title,
+    body,
+    author {
+        login,
+        avatarUrl
+    }
+}
+
 query listRepoPullRequest($repoOwner: String!, $repoName:String!, $id: String){
     repository(owner: $repoOwner, name: $repoName) {
         pullRequests(states:[OPEN], first: 10, after: $id, orderBy: {field: CREATED_AT, direction: DESC}) {
@@ -7,12 +16,7 @@ query listRepoPullRequest($repoOwner: String!, $repoName:String!, $id: String){
                 startCursor
             },
             nodes {
-                title,
-                body,
-                author {
-                    login,
-                    avatarUrl
-                }
+                ...pullRequests
             }
         }
     }

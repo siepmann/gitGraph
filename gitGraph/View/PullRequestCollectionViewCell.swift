@@ -1,15 +1,14 @@
 //
-//  RepositoryCollectionViewCell.swift
+//  PullRequestCollectionViewCell.swift
 //  gitGraph
 //
-//  Created by Guilherme Siepmann on 25/06/2018.
+//  Created by Guilherme Siepmann on 28/06/2018.
 //  Copyright © 2018 Guilherme Siepmann. All rights reserved.
 //
 
 import UIKit
-import SnapKit
 
-class RepositoryCollectionViewCell: UICollectionViewCell {
+class PullRequestCollectionViewCell: UICollectionViewCell {
     let repoName: UILabel = {
         let label = UILabel()
         return label
@@ -21,7 +20,7 @@ class RepositoryCollectionViewCell: UICollectionViewCell {
     }()
     
     let forkImage: UIImageView = {
-       return UIImageView()
+        return UIImageView()
     }()
     
     let forkCount: UILabel = {
@@ -63,19 +62,15 @@ class RepositoryCollectionViewCell: UICollectionViewCell {
     }
 }
 
-extension RepositoryCollectionViewCell: SetupCellProtocol {
-    typealias DataType = Repository
+extension PullRequestCollectionViewCell: SetupCellProtocol {
+    typealias DataType = PullRequests
     
     func setupCell(data: DataType) {
-        guard let repo = data.asRepository else { return }
-        self.repoName.text = repo.name
-        self.repoBody.text = repo.descriptionHtml
-        self.forkCount.text = "\(repo.forks.totalCount)"
-        self.starsCount.text = "\(repo.stargazers.totalCount)"
+        
     }
 }
 
-extension RepositoryCollectionViewCell: ConfigureCellProtocol {
+extension PullRequestCollectionViewCell: ConfigureCellProtocol {
     static var cellIdentifier: String {
         return "\(self)"
     }

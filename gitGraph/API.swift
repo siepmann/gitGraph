@@ -4,7 +4,9 @@ import Apollo
 
 public final class ListRepoPullRequestQuery: GraphQLQuery {
   public static let operationString =
-    "query listRepoPullRequest($repoOwner: String!, $repoName: String!, $id: String) {\n  repository(owner: $repoOwner, name: $repoName) {\n    __typename\n    pullRequests(states: [OPEN], first: 10, after: $id, orderBy: {field: CREATED_AT, direction: DESC}) {\n      __typename\n      totalCount\n      pageInfo {\n        __typename\n        endCursor\n        startCursor\n      }\n      nodes {\n        __typename\n        title\n        body\n        author {\n          __typename\n          login\n          avatarUrl\n        }\n      }\n    }\n  }\n}"
+    "query listRepoPullRequest($repoOwner: String!, $repoName: String!, $id: String) {\n  repository(owner: $repoOwner, name: $repoName) {\n    __typename\n    pullRequests(states: [OPEN], first: 10, after: $id, orderBy: {field: CREATED_AT, direction: DESC}) {\n      __typename\n      totalCount\n      pageInfo {\n        __typename\n        endCursor\n        startCursor\n      }\n      nodes {\n        __typename\n        ...pullRequests\n      }\n    }\n  }\n}"
+
+  public static var requestString: String { return operationString.appending(PullRequests.fragmentString) }
 
   public var repoOwner: String
   public var repoName: String
@@ -197,6 +199,7 @@ public final class ListRepoPullRequestQuery: GraphQLQuery {
 
           public static let selections: [GraphQLSelection] = [
             GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
             GraphQLField("title", type: .nonNull(.scalar(String.self))),
             GraphQLField("body", type: .nonNull(.scalar(String.self))),
             GraphQLField("author", type: .object(Author.selections)),
@@ -248,6 +251,28 @@ public final class ListRepoPullRequestQuery: GraphQLQuery {
             }
             set {
               snapshot.updateValue(newValue?.snapshot, forKey: "author")
+            }
+          }
+
+          public var fragments: Fragments {
+            get {
+              return Fragments(snapshot: snapshot)
+            }
+            set {
+              snapshot += newValue.snapshot
+            }
+          }
+
+          public struct Fragments {
+            public var snapshot: Snapshot
+
+            public var pullRequests: PullRequests {
+              get {
+                return PullRequests(snapshot: snapshot)
+              }
+              set {
+                snapshot += newValue.snapshot
+              }
             }
           }
 
@@ -816,6 +841,126 @@ public final class SearchRepoByLanguageQuery: GraphQLQuery {
             }
           }
         }
+      }
+    }
+  }
+}
+
+public struct PullRequests: GraphQLFragment {
+  public static let fragmentString =
+    "fragment pullRequests on PullRequest {\n  __typename\n  title\n  body\n  author {\n    __typename\n    login\n    avatarUrl\n  }\n}"
+
+  public static let possibleTypes = ["PullRequest"]
+
+  public static let selections: [GraphQLSelection] = [
+    GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+    GraphQLField("title", type: .nonNull(.scalar(String.self))),
+    GraphQLField("body", type: .nonNull(.scalar(String.self))),
+    GraphQLField("author", type: .object(Author.selections)),
+  ]
+
+  public var snapshot: Snapshot
+
+  public init(snapshot: Snapshot) {
+    self.snapshot = snapshot
+  }
+
+  public init(title: String, body: String, author: Author? = nil) {
+    self.init(snapshot: ["__typename": "PullRequest", "title": title, "body": body, "author": author.flatMap { (value: Author) -> Snapshot in value.snapshot }])
+  }
+
+  public var __typename: String {
+    get {
+      return snapshot["__typename"]! as! String
+    }
+    set {
+      snapshot.updateValue(newValue, forKey: "__typename")
+    }
+  }
+
+  /// Identifies the pull request title.
+  public var title: String {
+    get {
+      return snapshot["title"]! as! String
+    }
+    set {
+      snapshot.updateValue(newValue, forKey: "title")
+    }
+  }
+
+  /// The body as Markdown.
+  public var body: String {
+    get {
+      return snapshot["body"]! as! String
+    }
+    set {
+      snapshot.updateValue(newValue, forKey: "body")
+    }
+  }
+
+  /// The actor who authored the comment.
+  public var author: Author? {
+    get {
+      return (snapshot["author"] as? Snapshot).flatMap { Author(snapshot: $0) }
+    }
+    set {
+      snapshot.updateValue(newValue?.snapshot, forKey: "author")
+    }
+  }
+
+  public struct Author: GraphQLSelectionSet {
+    public static let possibleTypes = ["Organization", "User", "Bot"]
+
+    public static let selections: [GraphQLSelection] = [
+      GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+      GraphQLField("login", type: .nonNull(.scalar(String.self))),
+      GraphQLField("avatarUrl", type: .nonNull(.scalar(String.self))),
+    ]
+
+    public var snapshot: Snapshot
+
+    public init(snapshot: Snapshot) {
+      self.snapshot = snapshot
+    }
+
+    public static func makeOrganization(login: String, avatarUrl: String) -> Author {
+      return Author(snapshot: ["__typename": "Organization", "login": login, "avatarUrl": avatarUrl])
+    }
+
+    public static func makeUser(login: String, avatarUrl: String) -> Author {
+      return Author(snapshot: ["__typename": "User", "login": login, "avatarUrl": avatarUrl])
+    }
+
+    public static func makeBot(login: String, avatarUrl: String) -> Author {
+      return Author(snapshot: ["__typename": "Bot", "login": login, "avatarUrl": avatarUrl])
+    }
+
+    public var __typename: String {
+      get {
+        return snapshot["__typename"]! as! String
+      }
+      set {
+        snapshot.updateValue(newValue, forKey: "__typename")
+      }
+    }
+
+    /// The username of the actor.
+    public var login: String {
+      get {
+        return snapshot["login"]! as! String
+      }
+      set {
+        snapshot.updateValue(newValue, forKey: "login")
+      }
+    }
+
+    /// A URL pointing to the actor's public avatar.
+    public var avatarUrl: String {
+      get {
+        return snapshot["avatarUrl"]! as! String
+      }
+      set {
+        snapshot.updateValue(newValue, forKey: "avatarUrl")
       }
     }
   }

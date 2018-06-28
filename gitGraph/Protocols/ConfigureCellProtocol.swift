@@ -10,4 +10,15 @@ import Foundation
 
 protocol ConfigureCellProtocol {
     static var cellIdentifier: String { get }
+    
+    func setupView()
+    func buildViewHierarchy()
+    func setupConstraints()
+}
+
+extension ConfigureCellProtocol {
+    func setupView() {
+        buildViewHierarchy()
+        setupConstraints()
+    }
 }

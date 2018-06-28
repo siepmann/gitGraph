@@ -15,11 +15,7 @@ class CollectionViewDataSource<T: UICollectionViewCell & SetupCellProtocol & Con
     init(data:[DataType] = []) {
         self.data = data
     }
-    
-    func setDataSource(data: [DataType]) {
-        self.data = data
-    }
-    
+      
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return self.data.count
     }
