@@ -8,14 +8,11 @@
 
 import UIKit
 
-class CollectionViewDataSourceDelegate<T: UICollectionViewCell & SetupCellProtocol & ConfigureCellProtocol>: NSObject, UICollectionViewDataSource {
+class CollectionViewDataSource<T: UICollectionViewCell & SetupCellProtocol & ConfigureCellProtocol>: NSObject, UICollectionViewDataSource {
     typealias DataType = T.DataType
     private var data: [DataType] = []
-    private let selectionBlock: SelectedItem
-    typealias SelectedItem = (_ selectedItem: DataType) -> ()
     
-    init(data:[DataType] = [], selectedItem: @escaping SelectedItem) {
-        self.selectionBlock = selectedItem
+    init(data:[DataType] = []) {
         self.data = data
     }
     
@@ -31,10 +28,5 @@ class CollectionViewDataSourceDelegate<T: UICollectionViewCell & SetupCellProtoc
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: T.cellIdentifier, for: indexPath) as! T
         cell.setupCell(data: self.data[indexPath.row])
         return cell
-        
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        self.selectionBlock(self.data[indexPath.row])
     }
 }

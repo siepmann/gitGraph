@@ -17,9 +17,7 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         let array: [Repository] = []
         
-        self.collectionView.dataSource = CollectionViewDataSourceDelegate<RepositoryCollectionViewCell>(data: array, selectedItem: { selectedItem in
-            print(selectedItem)
-        })
+        self.collectionView.dataSource = CollectionViewDataSource<RepositoryCollectionViewCell>(data: array)
     }
     
     override func didReceiveMemoryWarning() {
