@@ -38,7 +38,9 @@ class ViewController: UIViewController {
 
 extension ViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let data = repositories[indexPath.row]
-        print("\(data.asRepository?.nameWithOwner ?? "")")
+        guard let data = repositories[indexPath.row].asRepository else { return }
+        let vc = PullRequestsViewController()
+        vc.pullRequestQuery = ListRepoPullRequestQuery(repoOwner: data.owner.login, repoName: data.name)
+        self.navigationController?.pushViewController(vc, animated: true)
     }
 }

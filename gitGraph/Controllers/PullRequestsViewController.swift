@@ -10,11 +10,13 @@ import UIKit
 import Apollo
 
 class PullRequestsViewController: UIViewController {
+    var pullRequestQuery: ListRepoPullRequestQuery!
+    
     private var collectionView: UICollectionView = {
         return UICollectionView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height))
     }()
     
-    var pullRequest: [PullRequests] = [] {
+    fileprivate var pullRequest: [PullRequests] = [] {
         didSet {
             collectionView.dataSource = CollectionViewDataSource<PullRequestCollectionViewCell>(data: pullRequest)
             collectionView.delegate = self
@@ -27,8 +29,7 @@ class PullRequestsViewController: UIViewController {
     }
     
     fileprivate func loadRepos() {
-        let query = ListRepoPullRequestQuery(repoOwner: "", repoName: "")
-        apollo.fetch(query: query) { [weak self] (result, error) in
+        apollo.fetch(query: pullRequestQuery) { [weak self] (result, error) in
             guard let data = result?.data?.repository?.pullRequests,
                   let nodes = data.nodes else { return }
             
