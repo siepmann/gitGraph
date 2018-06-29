@@ -12,11 +12,13 @@ import SnapKit
 class RepositoryCollectionViewCell: UICollectionViewCell {
     let repoName: UILabel = {
         let label = UILabel()
+        label.font = .boldSystemFont(ofSize: 18)
         return label
     }()
     
     let repoBody: UILabel = {
         let label = UILabel()
+        label.font = .systemFont(ofSize: 12)
         return label
     }()
     
@@ -69,7 +71,7 @@ extension RepositoryCollectionViewCell: SetupCellProtocol {
     func setupCell(data: DataType) {
         guard let repo = data.asRepository else { return }
         self.repoName.text = repo.name
-        self.repoBody.text = repo.descriptionHtml
+        self.repoBody.text = repo.description
         self.forkCount.text = "\(repo.forks.totalCount)"
         self.starsCount.text = "\(repo.stargazers.totalCount)"
     }
@@ -95,56 +97,51 @@ extension RepositoryCollectionViewCell: ConfigureCellProtocol {
         
         self.contentView.snp.makeConstraints { make in
             make.width.equalTo(width)
-            make.height.equalTo(200)
+            make.height.equalTo(100)
             make.left.right.top.bottom.equalTo(0)
         }
         
         self.repoName.snp.makeConstraints { make in
-            make.width.equalTo(width - 8 - 60)
+            make.width.equalTo(width - 10 - 60)
             make.height.equalTo(30)
-            make.top.left.equalTo(self.contentView).offset(8)
+            make.top.left.equalTo(self.contentView).offset(10)
         }
-        
-        //162
         
         self.repoBody.snp.makeConstraints { make in
-            make.width.equalTo( width - 8 - 60)
-            make.height.equalTo(90)
-            make.left.equalTo(self.contentView).offset(8)
-            make.top.equalTo(self.repoName.snp.bottom).offset(10)
+            make.width.equalTo( width - 10 - 60)
+            make.height.equalTo(30)
+            make.left.equalTo(self.contentView).offset(10)
+            make.top.equalTo(self.repoName.snp.bottom).offset(5)
         }
         
-        //62
-        
         self.forkImage.snp.makeConstraints { make in
-            make.left.equalTo(self.contentView).offset(8)
+            make.left.equalTo(self.contentView).offset(10)
             make.width.height.equalTo(20)
-            make.top.equalTo(self.repoBody.snp.bottom).offset(10)
+            make.top.equalTo(self.repoBody.snp.bottom).offset(5)
         }
         
         self.forkCount.snp.makeConstraints { make in
-            make.left.equalTo(self.forkImage.snp.left).offset(5)
-            make.width.equalTo(50)
+            make.left.equalTo(self.forkImage.snp.right).offset(5)
+            make.width.equalTo(100)
             make.height.equalTo(20)
-            make.top.equalTo(self.repoBody.snp.bottom).offset(10)
+            make.top.equalTo(self.repoBody.snp.bottom).offset(5)
         }
         
         self.starsImage.snp.makeConstraints { make in
-            make.left.equalTo(self.forkCount.snp.left).offset(8)
+            make.left.equalTo(self.forkCount.snp.right).offset(8)
             make.width.height.equalTo(20)
-            make.top.equalTo(self.repoBody.snp.bottom).offset(10)
+            make.top.equalTo(self.repoBody.snp.bottom).offset(5)
         }
         
         self.starsCount.snp.makeConstraints { make in
-            make.left.equalTo(self.starsImage.snp.left).offset(5)
-            make.width.equalTo(50)
+            make.left.equalTo(self.starsImage.snp.right).offset(5)
+            make.width.equalTo(100)
             make.height.equalTo(20)
-            make.top.equalTo(self.repoBody.snp.bottom).offset(10)
+            make.top.equalTo(self.repoBody.snp.bottom).offset(5)
         }
         
         self.userView.snp.makeConstraints { make in
-            make.top.bottom.right.equalTo(self.contentView)
-            make.left.equalTo(self.contentView).inset(60)
+            make.top.right.bottom.equalTo(self.contentView)
             make.width.equalTo(60)
         }
     }

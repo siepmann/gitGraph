@@ -9,20 +9,31 @@
 import UIKit
 import Apollo
 
-class ViewController: UIViewController {
+class HomeViewController: UIViewController {
     private var collectionView: UICollectionView = {
-        return UICollectionView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height))
+        let flowLayout = UICollectionViewFlowLayout()
+        flowLayout.scrollDirection = .vertical
+        flowLayout.estimatedItemSize = CGSize(width: 200, height: 100)
+        flowLayout.minimumLineSpacing = 0
+        flowLayout.minimumInteritemSpacing = 0
+        
+        return UICollectionView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height),
+                                collectionViewLayout: flowLayout)
     }()
     
     var repositories: [Repository] = [] {
         didSet {
-            collectionView.dataSource = CollectionViewDataSource<RepositoryCollectionViewCell>(data: repositories)
+            let dataSource = CollectionViewDataSource<RepositoryCollectionViewCell>(data: self.repositories)
+            collectionView.dataSource = dataSource
             collectionView.delegate = self
+            collectionView.reloadData()
         }
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        collectionView.register(RepositoryCollectionViewCell.self, forCellWithReuseIdentifier: RepositoryCollectionViewCell.cellIdentifier)
+        self.view.addSubview(collectionView)
         self.loadRepos()
     }
     
@@ -36,7 +47,7 @@ class ViewController: UIViewController {
     }
 }
 
-extension ViewController: UICollectionViewDelegate {
+extension HomeViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard let data = repositories[indexPath.row].asRepository else { return }
         let vc = PullRequestsViewController()

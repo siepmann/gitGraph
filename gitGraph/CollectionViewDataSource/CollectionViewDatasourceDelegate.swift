@@ -12,7 +12,13 @@ class CollectionViewDataSource<T: UICollectionViewCell & SetupCellProtocol & Con
     typealias DataType = T.DataType
     private var data: [DataType] = []
     
+    override init() { }
+    
     init(data:[DataType] = []) {
+        self.data = data
+    }
+    
+    func setDataSource(data: [DataType]) {
         self.data = data
     }
       

@@ -9,6 +9,6 @@
 import Foundation
 
 enum Config {
-    static let token = "bba254b71b6b9afa245b94de1141a774739dca1e"
+    static let token = "d7cc6cd19e774905e0161a9d0dfa22c377a187fd"
     static let endpointUrl = "https://api.github.com/graphql"
 }

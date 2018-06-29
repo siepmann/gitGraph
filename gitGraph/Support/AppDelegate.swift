@@ -21,12 +21,12 @@ let apollo: ApolloClient = {
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
-    var navController: UINavigationController?
-
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        self.navController!.pushViewController(ViewController(), animated: false)
+        let navigationController = UINavigationController(rootViewController: HomeViewController())
+        
         self.window = UIWindow(frame: UIScreen.main.bounds)
-        self.window?.rootViewController = navController
+        self.window?.rootViewController = navigationController
         self.window?.backgroundColor = .white
         self.window?.makeKeyAndVisible()
 

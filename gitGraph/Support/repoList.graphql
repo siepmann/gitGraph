@@ -11,7 +11,7 @@ fragment repository on Node {
         name
         nameWithOwner
         ...owner
-        descriptionHTML
+        description
         stargazers {
             totalCount
         }

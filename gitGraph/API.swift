@@ -518,8 +518,8 @@ public final class SearchRepoByLanguageQuery: GraphQLQuery {
             return Node(snapshot: ["__typename": "MarketplaceListing"])
           }
 
-          public static func makeRepository(name: String, nameWithOwner: String, owner: AsRepository.Owner, descriptionHtml: String, stargazers: AsRepository.Stargazer, forks: AsRepository.Fork, updatedAt: String) -> Node {
-            return Node(snapshot: ["__typename": "Repository", "name": name, "nameWithOwner": nameWithOwner, "owner": owner.snapshot, "descriptionHTML": descriptionHtml, "stargazers": stargazers.snapshot, "forks": forks.snapshot, "updatedAt": updatedAt])
+          public static func makeRepository(name: String, nameWithOwner: String, owner: AsRepository.Owner, description: String? = nil, stargazers: AsRepository.Stargazer, forks: AsRepository.Fork, updatedAt: String) -> Node {
+            return Node(snapshot: ["__typename": "Repository", "name": name, "nameWithOwner": nameWithOwner, "owner": owner.snapshot, "description": description, "stargazers": stargazers.snapshot, "forks": forks.snapshot, "updatedAt": updatedAt])
           }
 
           public var __typename: String {
@@ -575,7 +575,7 @@ public final class SearchRepoByLanguageQuery: GraphQLQuery {
               GraphQLField("nameWithOwner", type: .nonNull(.scalar(String.self))),
               GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
               GraphQLField("owner", type: .nonNull(.object(Owner.selections))),
-              GraphQLField("descriptionHTML", type: .nonNull(.scalar(String.self))),
+              GraphQLField("description", type: .scalar(String.self)),
               GraphQLField("stargazers", type: .nonNull(.object(Stargazer.selections))),
               GraphQLField("forks", type: .nonNull(.object(Fork.selections))),
               GraphQLField("updatedAt", type: .nonNull(.scalar(String.self))),
@@ -587,8 +587,8 @@ public final class SearchRepoByLanguageQuery: GraphQLQuery {
               self.snapshot = snapshot
             }
 
-            public init(name: String, nameWithOwner: String, owner: Owner, descriptionHtml: String, stargazers: Stargazer, forks: Fork, updatedAt: String) {
-              self.init(snapshot: ["__typename": "Repository", "name": name, "nameWithOwner": nameWithOwner, "owner": owner.snapshot, "descriptionHTML": descriptionHtml, "stargazers": stargazers.snapshot, "forks": forks.snapshot, "updatedAt": updatedAt])
+            public init(name: String, nameWithOwner: String, owner: Owner, description: String? = nil, stargazers: Stargazer, forks: Fork, updatedAt: String) {
+              self.init(snapshot: ["__typename": "Repository", "name": name, "nameWithOwner": nameWithOwner, "owner": owner.snapshot, "description": description, "stargazers": stargazers.snapshot, "forks": forks.snapshot, "updatedAt": updatedAt])
             }
 
             public var __typename: String {
@@ -630,13 +630,13 @@ public final class SearchRepoByLanguageQuery: GraphQLQuery {
               }
             }
 
-            /// The description of the repository rendered to HTML.
-            public var descriptionHtml: String {
+            /// The description of the repository.
+            public var description: String? {
               get {
-                return snapshot["descriptionHTML"]! as! String
+                return snapshot["description"] as? String
               }
               set {
-                snapshot.updateValue(newValue, forKey: "descriptionHTML")
+                snapshot.updateValue(newValue, forKey: "description")
               }
             }
 
@@ -1072,7 +1072,7 @@ public struct Owner: GraphQLFragment {
 
 public struct Repository: GraphQLFragment {
   public static let fragmentString =
-    "fragment repository on Node {\n  __typename\n  ... on Repository {\n    name\n    nameWithOwner\n    ...owner\n    descriptionHTML\n    stargazers {\n      __typename\n      totalCount\n    }\n    forks {\n      __typename\n      totalCount\n    }\n    updatedAt\n  }\n}"
+    "fragment repository on Node {\n  __typename\n  ... on Repository {\n    name\n    nameWithOwner\n    ...owner\n    description\n    stargazers {\n      __typename\n      totalCount\n    }\n    forks {\n      __typename\n      totalCount\n    }\n    updatedAt\n  }\n}"
 
   public static let possibleTypes = ["License", "MarketplaceCategory", "MarketplaceListing", "Organization", "Project", "ProjectColumn", "ProjectCard", "Issue", "User", "Repository", "CommitComment", "UserContentEdit", "Reaction", "Commit", "Status", "StatusContext", "Tree", "Ref", "PullRequest", "Label", "IssueComment", "PullRequestCommit", "Milestone", "ReviewRequest", "Team", "OrganizationInvitation", "PullRequestReview", "PullRequestReviewComment", "CommitCommentThread", "PullRequestReviewThread", "ClosedEvent", "ReopenedEvent", "SubscribedEvent", "UnsubscribedEvent", "MergedEvent", "ReferencedEvent", "CrossReferencedEvent", "AssignedEvent", "UnassignedEvent", "LabeledEvent", "UnlabeledEvent", "MilestonedEvent", "DemilestonedEvent", "RenamedTitleEvent", "LockedEvent", "UnlockedEvent", "DeployedEvent", "Deployment", "DeploymentStatus", "HeadRefDeletedEvent", "HeadRefRestoredEvent", "HeadRefForcePushedEvent", "BaseRefForcePushedEvent", "ReviewRequestedEvent", "ReviewRequestRemovedEvent", "ReviewDismissedEvent", "DeployKey", "Language", "ProtectedBranch", "PushAllowance", "ReviewDismissalAllowance", "Release", "ReleaseAsset", "RepositoryTopic", "Topic", "Gist", "GistComment", "PublicKey", "OrganizationIdentityProvider", "ExternalIdentity", "Blob", "Bot", "RepositoryInvitation", "BaseRefChangedEvent", "AddedToProjectEvent", "CommentDeletedEvent", "ConvertedNoteToIssueEvent", "MentionedEvent", "MovedColumnsInProjectEvent", "RemovedFromProjectEvent", "Tag"]
 
@@ -1411,8 +1411,8 @@ public struct Repository: GraphQLFragment {
     return Repository(snapshot: ["__typename": "Tag"])
   }
 
-  public static func makeRepository(name: String, nameWithOwner: String, owner: AsRepository.Owner, descriptionHtml: String, stargazers: AsRepository.Stargazer, forks: AsRepository.Fork, updatedAt: String) -> Repository {
-    return Repository(snapshot: ["__typename": "Repository", "name": name, "nameWithOwner": nameWithOwner, "owner": owner.snapshot, "descriptionHTML": descriptionHtml, "stargazers": stargazers.snapshot, "forks": forks.snapshot, "updatedAt": updatedAt])
+  public static func makeRepository(name: String, nameWithOwner: String, owner: AsRepository.Owner, description: String? = nil, stargazers: AsRepository.Stargazer, forks: AsRepository.Fork, updatedAt: String) -> Repository {
+    return Repository(snapshot: ["__typename": "Repository", "name": name, "nameWithOwner": nameWithOwner, "owner": owner.snapshot, "description": description, "stargazers": stargazers.snapshot, "forks": forks.snapshot, "updatedAt": updatedAt])
   }
 
   public var __typename: String {
@@ -1444,7 +1444,7 @@ public struct Repository: GraphQLFragment {
       GraphQLField("nameWithOwner", type: .nonNull(.scalar(String.self))),
       GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
       GraphQLField("owner", type: .nonNull(.object(Owner.selections))),
-      GraphQLField("descriptionHTML", type: .nonNull(.scalar(String.self))),
+      GraphQLField("description", type: .scalar(String.self)),
       GraphQLField("stargazers", type: .nonNull(.object(Stargazer.selections))),
       GraphQLField("forks", type: .nonNull(.object(Fork.selections))),
       GraphQLField("updatedAt", type: .nonNull(.scalar(String.self))),
@@ -1456,8 +1456,8 @@ public struct Repository: GraphQLFragment {
       self.snapshot = snapshot
     }
 
-    public init(name: String, nameWithOwner: String, owner: Owner, descriptionHtml: String, stargazers: Stargazer, forks: Fork, updatedAt: String) {
-      self.init(snapshot: ["__typename": "Repository", "name": name, "nameWithOwner": nameWithOwner, "owner": owner.snapshot, "descriptionHTML": descriptionHtml, "stargazers": stargazers.snapshot, "forks": forks.snapshot, "updatedAt": updatedAt])
+    public init(name: String, nameWithOwner: String, owner: Owner, description: String? = nil, stargazers: Stargazer, forks: Fork, updatedAt: String) {
+      self.init(snapshot: ["__typename": "Repository", "name": name, "nameWithOwner": nameWithOwner, "owner": owner.snapshot, "description": description, "stargazers": stargazers.snapshot, "forks": forks.snapshot, "updatedAt": updatedAt])
     }
 
     public var __typename: String {
@@ -1499,13 +1499,13 @@ public struct Repository: GraphQLFragment {
       }
     }
 
-    /// The description of the repository rendered to HTML.
-    public var descriptionHtml: String {
+    /// The description of the repository.
+    public var description: String? {
       get {
-        return snapshot["descriptionHTML"]! as! String
+        return snapshot["description"] as? String
       }
       set {
-        snapshot.updateValue(newValue, forKey: "descriptionHTML")
+        snapshot.updateValue(newValue, forKey: "description")
       }
     }
 

@@ -13,13 +13,21 @@ class PullRequestsViewController: UIViewController {
     var pullRequestQuery: ListRepoPullRequestQuery!
     
     private var collectionView: UICollectionView = {
-        return UICollectionView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height))
+        let flowLayout = UICollectionViewFlowLayout()
+        flowLayout.scrollDirection = .vertical
+        flowLayout.estimatedItemSize = CGSize(width: 200, height: 100)
+        flowLayout.minimumLineSpacing = 0
+        flowLayout.minimumInteritemSpacing = 0
+        
+        return UICollectionView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height),
+                                collectionViewLayout: flowLayout)
     }()
     
     fileprivate var pullRequest: [PullRequestData] = [] {
         didSet {
             collectionView.dataSource = CollectionViewDataSource<PullRequestCollectionViewCell>(data: pullRequest)
             collectionView.delegate = self
+            collectionView.reloadData()
         }
     }
     
