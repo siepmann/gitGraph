@@ -16,7 +16,7 @@ class PullRequestsViewController: UIViewController {
         return UICollectionView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height))
     }()
     
-    fileprivate var pullRequest: [PullRequests] = [] {
+    fileprivate var pullRequest: [PullRequestData] = [] {
         didSet {
             collectionView.dataSource = CollectionViewDataSource<PullRequestCollectionViewCell>(data: pullRequest)
             collectionView.delegate = self
@@ -33,7 +33,7 @@ class PullRequestsViewController: UIViewController {
             guard let data = result?.data?.repository?.pullRequests,
                   let nodes = data.nodes else { return }
             
-            self?.pullRequest.append(contentsOf: nodes.flatMap{ $0?.fragments.pullRequests })
+            self?.pullRequest.append(contentsOf: nodes.flatMap{ $0?.fragments.pullRequestData })
        }
     }
 }

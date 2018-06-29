@@ -1,4 +1,4 @@
-fragment pullRequests on PullRequest {
+fragment PullRequestData on PullRequest {
     title,
     body,
     author {
@@ -16,7 +16,7 @@ query listRepoPullRequest($repoOwner: String!, $repoName:String!, $id: String){
                 startCursor
             },
             nodes {
-                ...pullRequests
+                ...PullRequestData
             }
         }
     }

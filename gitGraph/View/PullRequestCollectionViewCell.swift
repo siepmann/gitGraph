@@ -63,7 +63,7 @@ class PullRequestCollectionViewCell: UICollectionViewCell {
 }
 
 extension PullRequestCollectionViewCell: SetupCellProtocol {
-    typealias DataType = PullRequests
+    typealias DataType = PullRequestData
     
     func setupCell(data: DataType) {
         

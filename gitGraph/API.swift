@@ -4,9 +4,9 @@ import Apollo
 
 public final class ListRepoPullRequestQuery: GraphQLQuery {
   public static let operationString =
-    "query listRepoPullRequest($repoOwner: String!, $repoName: String!, $id: String) {\n  repository(owner: $repoOwner, name: $repoName) {\n    __typename\n    pullRequests(states: [OPEN], first: 10, after: $id, orderBy: {field: CREATED_AT, direction: DESC}) {\n      __typename\n      totalCount\n      pageInfo {\n        __typename\n        endCursor\n        startCursor\n      }\n      nodes {\n        __typename\n        ...pullRequests\n      }\n    }\n  }\n}"
+    "query listRepoPullRequest($repoOwner: String!, $repoName: String!, $id: String) {\n  repository(owner: $repoOwner, name: $repoName) {\n    __typename\n    pullRequests(states: [OPEN], first: 10, after: $id, orderBy: {field: CREATED_AT, direction: DESC}) {\n      __typename\n      totalCount\n      pageInfo {\n        __typename\n        endCursor\n        startCursor\n      }\n      nodes {\n        __typename\n        ...PullRequestData\n      }\n    }\n  }\n}"
 
-  public static var requestString: String { return operationString.appending(PullRequests.fragmentString) }
+  public static var requestString: String { return operationString.appending(PullRequestData.fragmentString) }
 
   public var repoOwner: String
   public var repoName: String
@@ -266,9 +266,9 @@ public final class ListRepoPullRequestQuery: GraphQLQuery {
           public struct Fragments {
             public var snapshot: Snapshot
 
-            public var pullRequests: PullRequests {
+            public var pullRequestData: PullRequestData {
               get {
-                return PullRequests(snapshot: snapshot)
+                return PullRequestData(snapshot: snapshot)
               }
               set {
                 snapshot += newValue.snapshot
@@ -846,9 +846,9 @@ public final class SearchRepoByLanguageQuery: GraphQLQuery {
   }
 }
 
-public struct PullRequests: GraphQLFragment {
+public struct PullRequestData: GraphQLFragment {
   public static let fragmentString =
-    "fragment pullRequests on PullRequest {\n  __typename\n  title\n  body\n  author {\n    __typename\n    login\n    avatarUrl\n  }\n}"
+    "fragment PullRequestData on PullRequest {\n  __typename\n  title\n  body\n  author {\n    __typename\n    login\n    avatarUrl\n  }\n}"
 
   public static let possibleTypes = ["PullRequest"]
 
