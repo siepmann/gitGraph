@@ -8,10 +8,15 @@ DEPENDENCIES:
   - Apollo
   - SnapKit
 
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - Apollo
+    - SnapKit
+
 SPEC CHECKSUMS:
   Apollo: 66e0f52289551545adb7ecdd994e713fdbae26eb
   SnapKit: a42d492c16e80209130a3379f73596c3454b7694
 
 PODFILE CHECKSUM: 91c660b3df5a42c95894b3f2bf14dc456a5f158b
 
-COCOAPODS: 1.4.0
+COCOAPODS: 1.5.3

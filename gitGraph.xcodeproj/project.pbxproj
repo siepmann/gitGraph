@@ -12,7 +12,6 @@
 		6FECD9D920E1712B001BF597 /* RepositoryCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FECD9D820E1712B001BF597 /* RepositoryCollectionViewCell.swift */; };
 		6FECD9DF20E25E9F001BF597 /* SetupCellProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FECD9DE20E25E9F001BF597 /* SetupCellProtocol.swift */; };
 		6FECD9E120E25EBF001BF597 /* ConfigureCellProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FECD9E020E25EBF001BF597 /* ConfigureCellProtocol.swift */; };
-		6FECD9E720E26978001BF597 /* CollectionViewDatasourceDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FECD9E620E26978001BF597 /* CollectionViewDatasourceDelegate.swift */; };
 		6FECD9F120E513B3001BF597 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FECD9F020E513B3001BF597 /* Config.swift */; };
 		6FECD9F420E55376001BF597 /* PullRequestsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FECD9F320E55376001BF597 /* PullRequestsViewController.swift */; };
 		6FECD9F620E55986001BF597 /* PullRequestCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FECD9F520E55986001BF597 /* PullRequestCollectionViewCell.swift */; };
@@ -42,7 +41,6 @@
 		6FECD9D820E1712B001BF597 /* RepositoryCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryCollectionViewCell.swift; sourceTree = "<group>"; };
 		6FECD9DE20E25E9F001BF597 /* SetupCellProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupCellProtocol.swift; sourceTree = "<group>"; };
 		6FECD9E020E25EBF001BF597 /* ConfigureCellProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigureCellProtocol.swift; sourceTree = "<group>"; };
-		6FECD9E620E26978001BF597 /* CollectionViewDatasourceDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionViewDatasourceDelegate.swift; sourceTree = "<group>"; };
 		6FECD9F020E513B3001BF597 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
 		6FECD9F320E55376001BF597 /* PullRequestsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PullRequestsViewController.swift; sourceTree = "<group>"; };
 		6FECD9F520E55986001BF597 /* PullRequestCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PullRequestCollectionViewCell.swift; sourceTree = "<group>"; };
@@ -122,14 +120,6 @@
 			path = Protocols;
 			sourceTree = "<group>";
 		};
-		6FECD9E520E2695C001BF597 /* CollectionViewDataSource */ = {
-			isa = PBXGroup;
-			children = (
-				6FECD9E620E26978001BF597 /* CollectionViewDatasourceDelegate.swift */,
-			);
-			path = CollectionViewDataSource;
-			sourceTree = "<group>";
-		};
 		6FECD9F220E5532E001BF597 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
@@ -164,7 +154,6 @@
 			children = (
 				6FFF5D0120DBCB9A002E7526 /* API.swift */,
 				6FFF5CFC20DBC7C0002E7526 /* schema.json */,
-				6FECD9E520E2695C001BF597 /* CollectionViewDataSource */,
 				6FECD9F220E5532E001BF597 /* Controllers */,
 				6FECD9DD20E25E7C001BF597 /* Protocols */,
 				6FFF5CFB20DBC7AF002E7526 /* Support */,
@@ -208,7 +197,6 @@
 				6FFF5CD520DBC79B002E7526 /* Frameworks */,
 				6FFF5CD620DBC79B002E7526 /* Resources */,
 				8226C35231C8DE70A2A4DE9C /* [CP] Embed Pods Frameworks */,
-				F648D988C5052ACDDBA1564C /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -227,8 +215,6 @@
 				6FFF5CE820DBC79B002E7526 /* Sources */,
 				6FFF5CE920DBC79B002E7526 /* Frameworks */,
 				6FFF5CEA20DBC79B002E7526 /* Resources */,
-				4550BBBB646A8501B230BBC3 /* [CP] Embed Pods Frameworks */,
-				760F5AA41A110FFB9B3096A3 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -320,21 +306,6 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		4550BBBB646A8501B230BBC3 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-gitGraphTests/Pods-gitGraphTests-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 		6FFF5CFE20DBC8C9002E7526 /* Generate Apollo GraphQL API */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 12;
@@ -348,21 +319,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "APOLLO_FRAMEWORK_PATH=\"$(eval find $FRAMEWORK_SEARCH_PATHS -name \"Apollo.framework\" -maxdepth 1)\"\n\nif [ -z \"$APOLLO_FRAMEWORK_PATH\" ]; then\necho \"error: Couldn't find Apollo.framework in FRAMEWORK_SEARCH_PATHS; make sure to add the framework to your project.\"\nexit 1\nfi\n\ncd \"${SRCROOT}/${TARGET_NAME}\"\n$APOLLO_FRAMEWORK_PATH/check-and-run-apollo-codegen.sh generate $(find . -name '*.graphql') --schema schema.json --output API.swift";
-		};
-		760F5AA41A110FFB9B3096A3 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-gitGraphTests/Pods-gitGraphTests-resources.sh\"\n";
-			showEnvVarsInLog = 0;
 		};
 		8226C35231C8DE70A2A4DE9C /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -402,21 +358,6 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		F648D988C5052ACDDBA1564C /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-gitGraph/Pods-gitGraph-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -429,7 +370,6 @@
 				6FECD9DF20E25E9F001BF597 /* SetupCellProtocol.swift in Sources */,
 				6FECD9E120E25EBF001BF597 /* ConfigureCellProtocol.swift in Sources */,
 				6FFF5D0220DBCB9A002E7526 /* API.swift in Sources */,
-				6FECD9E720E26978001BF597 /* CollectionViewDatasourceDelegate.swift in Sources */,
 				6FECD9F120E513B3001BF597 /* Config.swift in Sources */,
 				6FECD9F620E55986001BF597 /* PullRequestCollectionViewCell.swift in Sources */,
 				6FECD9F420E55376001BF597 /* PullRequestsViewController.swift in Sources */,

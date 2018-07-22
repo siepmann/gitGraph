@@ -23,17 +23,16 @@ class HomeViewController: UIViewController {
     
     var repositories: [Repository] = [] {
         didSet {
-            let dataSource = CollectionViewDataSource<RepositoryCollectionViewCell>(data: self.repositories)
-            collectionView.dataSource = dataSource
-            collectionView.delegate = self
             collectionView.reloadData()
         }
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        collectionView.register(RepositoryCollectionViewCell.self, forCellWithReuseIdentifier: RepositoryCollectionViewCell.cellIdentifier)
         self.view.addSubview(collectionView)
+        collectionView.register(RepositoryCollectionViewCell.self, forCellWithReuseIdentifier: RepositoryCollectionViewCell.cellIdentifier)
+        collectionView.dataSource = self
+        collectionView.delegate = self
         self.loadRepos()
     }
     
@@ -42,7 +41,7 @@ class HomeViewController: UIViewController {
         apollo.fetch(query: query) { [weak self] (result, error) in
             guard let edges = result?.data?.search.edges else { return }
             
-            self?.repositories.append(contentsOf: edges.flatMap { $0?.node?.fragments.repository })
+            self?.repositories.append(contentsOf: edges.compactMap { $0?.node?.fragments.repository })
         }
     }
 }
@@ -53,5 +52,17 @@ extension HomeViewController: UICollectionViewDelegate {
         let vc = PullRequestsViewController()
         vc.pullRequestQuery = ListRepoPullRequestQuery(repoOwner: data.owner.login, repoName: data.name)
         self.navigationController?.pushViewController(vc, animated: true)
+    }
+}
+
+extension HomeViewController: UICollectionViewDataSource {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return repositories.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: RepositoryCollectionViewCell.cellIdentifier, for: indexPath)
+        (cell as! RepositoryCollectionViewCell).setupCell(data: repositories[indexPath.row])
+        return cell
     }
 }

@@ -25,14 +25,15 @@ class PullRequestsViewController: UIViewController {
     
     fileprivate var pullRequest: [PullRequestData] = [] {
         didSet {
-            collectionView.dataSource = CollectionViewDataSource<PullRequestCollectionViewCell>(data: pullRequest)
-            collectionView.delegate = self
             collectionView.reloadData()
         }
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        collectionView.register(PullRequestCollectionViewCell.self, forCellWithReuseIdentifier: PullRequestCollectionViewCell.cellIdentifier)
+        collectionView.dataSource = self
+        collectionView.delegate = self
         self.loadRepos()
     }
     
@@ -41,15 +42,27 @@ class PullRequestsViewController: UIViewController {
             guard let data = result?.data?.repository?.pullRequests,
                   let nodes = data.nodes else { return }
             
-            self?.pullRequest.append(contentsOf: nodes.flatMap{ $0?.fragments.pullRequestData })
+            self?.pullRequest.append(contentsOf: nodes.compactMap{ $0?.fragments.pullRequestData })
        }
     }
 }
 
 extension PullRequestsViewController: UICollectionViewDelegate {
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let data = pullRequest[indexPath.row]
+//    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+//        let data = pullRequest[indexPath.row]
 //        print("\(data.asRepository?.nameWithOwner ?? "")")
+//    }
+}
+
+extension PullRequestsViewController: UICollectionViewDataSource {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return pullRequest.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: PullRequestCollectionViewCell.cellIdentifier, for: indexPath)
+        (cell as! PullRequestCollectionViewCell).setupCell(data: pullRequest[indexPath.row])
+        return cell
     }
 }
 
